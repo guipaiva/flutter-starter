@@ -1,7 +1,7 @@
-FROM debian:bookworm-slim
+FROM mcr.microsoft.com/devcontainers/base:1-bookworm
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl git unzip xz-utils zip ca-certificates gnupg \
     && rm -rf /var/lib/apt/lists/*
 
@@ -15,18 +15,22 @@ RUN npm install -g firebase-tools
 # Flutter SDK
 ENV FLUTTER_VERSION=3.29.3
 ENV FLUTTER_HOME=/opt/flutter
-ENV PATH="${FLUTTER_HOME}/bin:${PATH}"
+ENV PATH="${FLUTTER_HOME}/bin:${FLUTTER_HOME}/bin/cache/dart-sdk/bin:${PATH}"
 
 RUN curl -fsSL \
     "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" \
-    | tar -xJ -C /opt
+    | tar -xJ -C /opt \
+    && chown -R vscode:vscode /opt/flutter
 
-RUN flutter config --enable-web --no-analytics && flutter precache --web
+# Run as vscode so flutter config and pub-cache land in the right home dir
+USER vscode
+ENV PUB_CACHE=/home/vscode/.pub-cache
+ENV PATH="${PATH}:/home/vscode/.pub-cache/bin"
 
-# FlutterFire CLI
-ENV PUB_CACHE=/root/.pub-cache
-ENV PATH="${PATH}:${PUB_CACHE}/bin"
-RUN dart pub global activate flutterfire_cli
+RUN flutter config --enable-web --no-analytics \
+    && flutter precache --web \
+    && dart pub global activate flutterfire_cli
 
+USER root
 WORKDIR /workspace
 EXPOSE 8080
