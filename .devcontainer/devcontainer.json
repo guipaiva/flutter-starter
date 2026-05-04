@@ -1,6 +1,6 @@
 {
   "name": "Flutter Dev",
-  "build": { "dockerfile": "Dockerfile" },
+  "image": "ghcr.io/guipaiva/flutter-starter:latest",
   "forwardPorts": [8080],
   "postCreateCommand": "[ -f pubspec.yaml ] && flutter pub get || flutter create --project-name meu_app .",
   "customizations": {

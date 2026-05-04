@@ -1,4 +1,5 @@
 FROM mcr.microsoft.com/devcontainers/base:1-bookworm
+LABEL org.opencontainers.image.source=https://github.com/guipaiva/flutter-starter
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
